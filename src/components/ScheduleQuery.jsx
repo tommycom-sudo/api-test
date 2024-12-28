@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, Space, DatePicker } from 'antd';
+import { Form, Input, Button, Card, Space, DatePicker, Select } from 'antd';
 import { Table, Tabs } from 'antd';
 import { useState, useEffect } from 'react';
 import vkbeautify from 'vkbeautify';
@@ -13,7 +13,15 @@ SyntaxHighlighter.registerLanguage('xml', xml);
 // localStorage 的 key
 const SCHEDULE_FORM_KEY = 'schedule_query_form_data';
 
-const ScheduleQuery = () => {
+// 定义机构列表
+const organizations = [
+  { value: '455857289', label: '南方医科大学口腔医院' },
+  { value: '455857289-P', label: '南方医科大学口腔医院番禺院区' },
+  { value: '455857289-H', label: '南方医科大学口腔医院海珠广场院区' },
+  { value: '455857289-F', label: '南方医科大学口腔医院盘福院区' },
+];
+
+const ScheduleQuery = ({ onNavigateToAppointment }) => {
   const [response, setResponse] = useState('');
   const [tableData, setTableData] = useState([]);
   const [form] = Form.useForm();
@@ -48,7 +56,7 @@ const ScheduleQuery = () => {
   };
 
   // 解析XML响应为表格数据
-  const parseXMLToTableData = (xmlString) => {
+  const parseXMLToTableData = (xmlString, formValues) => {
     try {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -78,41 +86,53 @@ const ScheduleQuery = () => {
       console.log('5. Data 节点:', data);
       if (!data) return [];
       
-      const schedules = data.getElementsByTagName('Schedules')[0]?.getElementsByTagName('Schedule')[0];
+      const schedulesContainer = data.getElementsByTagName('Schedules')[0];
+      const schedules = schedulesContainer ? Array.from(schedulesContainer.getElementsByTagName('Schedule')) : [];
       console.log('6. Schedule 节点:', schedules);
-      if (!schedules) return [];
+      if (!schedules.length) return [];
       
-      // 获取基本信息
-      const baseInfo = {
-        doctorName: schedules.getElementsByTagName('DoctorName')[0]?.textContent || '-',
-        deptName: schedules.getElementsByTagName('DeptName')[0]?.textContent || '-',
-        visitDate: schedules.getElementsByTagName('VisitDate')[0]?.textContent?.split(' ')[0] || '-',
-        registerCost: schedules.getElementsByTagName('RegisteredCost')[0]?.textContent || '0',
-      };
-      console.log('7. 解析的基本信息:', baseInfo);
-      
-      // 获取时间段信息
-      const timeFramesContainer = schedules.getElementsByTagName('TimeFrames')[0];
-      console.log('8. TimeFrames 容器:', timeFramesContainer);
-      const timeFrames = timeFramesContainer ? Array.from(timeFramesContainer.getElementsByTagName('TimeFrame')) : [];
-      console.log('9. 找到的时间段数组:', timeFrames);
-      
-      // 将每个时间段转换为一行数据
-      const result = timeFrames.map((timeFrame, index) => {
-        console.log(`10. 处理第 ${index + 1} 个时间段:`, timeFrame);
-        const startTime = timeFrame.getElementsByTagName('ScheduleStartDateTime')[0]?.textContent?.split(' ')[1]?.slice(0, 5) || '';
-        const endTime = timeFrame.getElementsByTagName('ScheduleEndDateTime')[0]?.textContent?.split(' ')[1]?.slice(0, 5) || '';
-        
-        const item = {
-          key: index,
-          ...baseInfo,
-          timeRange: `${startTime}-${endTime}`,
-          remainingNumber: timeFrame.getElementsByTagName('RemainingQuantity')[0]?.textContent || '0',
-          totalNumber: timeFrame.getElementsByTagName('ResourceSlotResourceSumTotal')[0]?.textContent || '0',
-          fee: baseInfo.registerCost,
+      // 遍历所有医生的排班信息
+      const result = schedules.flatMap((schedule, scheduleIndex) => {
+        // 获取基本信息
+        const baseInfo = {
+          doctorName: schedule.getElementsByTagName('DoctorName')[0]?.textContent || '-',
+          doctorCode: schedule.getElementsByTagName('DoctorCode')[0]?.textContent || '-',
+          deptName: schedule.getElementsByTagName('DeptName')[0]?.textContent || '-',
+          deptCode: schedule.getElementsByTagName('DeptCode')[0]?.textContent || '-',
+          visitDate: schedule.getElementsByTagName('VisitDate')[0]?.textContent?.split(' ')[0] || '-',
+          registerCost: schedule.getElementsByTagName('RegisteredCost')[0]?.textContent || '0',
+          scheduleMark: schedule.getElementsByTagName('ScheduleMark')[0]?.textContent || '',
+          doctorDutyType: schedule.getElementsByTagName('DoctorDutyType')[0]?.textContent || '-',
+          outpatientType: 'yyqd45585728900001',  // 固定值
+          visitOrganization: formValues.visitOrganization,  // 从传入的参数获取
+          organizationName: organizations.find(org => org.value === formValues.visitOrganization)?.label || '-',
         };
-        console.log(`11. 第 ${index + 1} 个时间段解析结果:`, item);
-        return item;
+        console.log(`7. 第 ${scheduleIndex + 1} 个医生的基本信息:`, baseInfo);
+      
+        // 获取时间段信息
+        const timeFramesContainer = schedule.getElementsByTagName('TimeFrames')[0];
+        console.log(`8. 第 ${scheduleIndex + 1} 个医生的 TimeFrames 容器:`, timeFramesContainer);
+        const timeFrames = timeFramesContainer ? Array.from(timeFramesContainer.getElementsByTagName('TimeFrame')) : [];
+        console.log(`9. 第 ${scheduleIndex + 1} 个医生的时间段数组:`, timeFrames);
+      
+        // 将每个时间段转换为一行数据
+        return timeFrames.map((timeFrame, timeFrameIndex) => {
+          console.log(`10. 处理第 ${scheduleIndex + 1} 个医生的第 ${timeFrameIndex + 1} 个时间段:`, timeFrame);
+          const startTime = timeFrame.getElementsByTagName('ScheduleStartDateTime')[0]?.textContent?.split(' ')[1]?.slice(0, 5) || '';
+          const endTime = timeFrame.getElementsByTagName('ScheduleEndDateTime')[0]?.textContent?.split(' ')[1]?.slice(0, 5) || '';
+          
+          const item = {
+            key: `${scheduleIndex}-${timeFrameIndex}`,
+            ...baseInfo,
+            timeRange: `${startTime}-${endTime}`,
+            remainingNumber: timeFrame.getElementsByTagName('RemainingQuantity')[0]?.textContent || '0',
+            totalNumber: timeFrame.getElementsByTagName('ResourceSlotResourceSumTotal')[0]?.textContent || '0',
+            fee: baseInfo.registerCost,
+            resourcesId: timeFrame.getElementsByTagName('ResourcesId')[0]?.textContent || '',
+          };
+          console.log(`11. 第 ${scheduleIndex + 1} 个医生的第 ${timeFrameIndex + 1} 个时间段解析结果:`, item);
+          return item;
+        });
       });
       
       console.log('12. 最终解析结果:', result);
@@ -134,9 +154,36 @@ const ScheduleQuery = () => {
       key: 'doctorName',
     },
     {
+      title: '医生代码',
+      dataIndex: 'doctorCode',
+      key: 'doctorCode',
+    },
+    {
+      title: '渠道',
+      dataIndex: 'outpatientType',
+      key: 'outpatientType',
+    },
+    {
       title: '科室名称',
       dataIndex: 'deptName',
       key: 'deptName',
+    },
+    {
+      title: '科室代码',
+      dataIndex: 'deptCode',
+      key: 'deptCode',
+    },
+    {
+      title: '午别',
+      dataIndex: 'doctorDutyType',
+      key: 'doctorDutyType',
+      render: (text) => {
+        const dutyTypes = {
+          '1': '上午',
+          '3': '下午',
+        };
+        return dutyTypes[text] || text;
+      },
     },
     {
       title: '就诊日期',
@@ -163,6 +210,16 @@ const ScheduleQuery = () => {
       dataIndex: 'fee',
       key: 'fee',
       render: (text) => `¥${text}`,
+    },
+    {
+      title: '机构名称',
+      dataIndex: 'organizationName',
+      key: 'organizationName',
+    },
+    {
+      title: '机构代码',
+      dataIndex: 'visitOrganization',
+      key: 'visitOrganization',
     },
   ];
 
@@ -191,10 +248,10 @@ const ScheduleQuery = () => {
                 </MsgHeader> 
                 <MsgBody>     
                   <Query>          
-                    <VisitOrganization>455857289</VisitOrganization>         
+                    <VisitOrganization>${values.visitOrganization}</VisitOrganization>         
                     <DeptName></DeptName>         
-                    <DeptCode>${values.deptCode}</DeptCode>         
-                    <DoctorCode>${values.doctorCode}</DoctorCode>         
+                    <DeptCode>${values.deptCode || ''}</DeptCode>         
+                    <DoctorCode>${values.doctorCode || ''}</DoctorCode>         
                     <ResourceLevelCode></ResourceLevelCode>         
                     <ResourceLevelName></ResourceLevelName>         
                     <DcotorIdcard></DcotorIdcard>         
@@ -222,14 +279,23 @@ const ScheduleQuery = () => {
         body: xmlData,
       });
       const data = await response.text();
-      console.log('API响应:', parseXMLToTableData(data));
+      console.log('API响应:', parseXMLToTableData(data, values));
       const formattedXML = formatXMLResponse(data);
       setResponse(formattedXML);
-      setTableData(parseXMLToTableData(data));
+      setTableData(parseXMLToTableData(data, values));
     } catch (error) {
       setResponse('请求出错：' + error.message);
       setTableData([]);
     }
+  };
+
+  // 处理行双击事件
+  const handleRowDoubleClick = (record) => {
+    onNavigateToAppointment({
+      resourcesId: record.resourcesId,
+      scheduleMark: record.scheduleMark,
+      appointmentDate: `${record.visitDate} ${record.timeRange.split('-')[0]}:00`
+    });
   };
 
   return (
@@ -247,10 +313,10 @@ const ScheduleQuery = () => {
           <Form.Item label="用户名" name="urid" rules={[{ required: true }]}>
             <Input placeholder="请输入用户名" />
           </Form.Item>
-          <Form.Item label="科室代码" name="deptCode" rules={[{ required: true }]}>
+          <Form.Item label="科室代码" name="deptCode">
             <Input placeholder="请输入科室代码" />
           </Form.Item>
-          <Form.Item label="医生代码" name="doctorCode" rules={[{ required: true }]}>
+          <Form.Item label="医生代码" name="doctorCode">
             <Input placeholder="请输入医生代码" />
           </Form.Item>
           <Form.Item label="就诊日期" name="visitDate" rules={[{ required: true }]}>
@@ -258,6 +324,17 @@ const ScheduleQuery = () => {
               style={{ width: '100%' }} 
               format="YYYY-MM-DD"
               placeholder="请选择就诊日期"
+            />
+          </Form.Item>
+          <Form.Item 
+            label="机构" 
+            name="visitOrganization" 
+            rules={[{ required: true, message: '请选择机构' }]}
+            initialValue="455857289"
+          >
+            <Select
+              placeholder="请选择机构"
+              options={organizations}
             />
           </Form.Item>
           <Form.Item>
@@ -283,11 +360,22 @@ const ScheduleQuery = () => {
                 <Table
                   columns={columns}
                   dataSource={tableData}
-                  pagination={false}
+                  pagination={{
+                    total: tableData.length,
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条`,
+                    pageSizeOptions: ['10', '20', '50', '100'],
+                  }}
                   scroll={{ x: true }}
                   locale={{
                     emptyText: '暂无数据'
                   }}
+                  onRow={(record) => ({
+                    onDoubleClick: () => handleRowDoubleClick(record),
+                    style: { cursor: 'pointer' }
+                  })}
                 />
               ),
             },

@@ -2,11 +2,18 @@ import { Layout, Menu } from 'antd';
 import { useState } from 'react';
 import ApiTest from './components/ApiTest';
 import ScheduleQuery from './components/ScheduleQuery';
+import AppointmentLock from './components/AppointmentLock';
 
 const { Sider, Content } = Layout;
 
 function App() {
   const [selectedKeys, setSelectedKeys] = useState(['1']);
+  const [appointmentDefaults, setAppointmentDefaults] = useState(null);
+
+  const navigateToAppointment = (defaults) => {
+    setAppointmentDefaults(defaults);
+    setSelectedKeys(['3']);
+  };
 
   const menuItems = [
     {
@@ -20,6 +27,10 @@ function App() {
         {
           key: '2',
           label: '号源排班查询',
+        },
+        {
+          key: '3',
+          label: '预约锁号',
         },
       ],
     },
@@ -40,7 +51,13 @@ function App() {
       </Sider>
       <Layout style={{ padding: '24px' }}>
         <Content>
-          {selectedKeys[0] === '1' ? <ApiTest /> : <ScheduleQuery />}
+          {
+            {
+              '1': <ApiTest />,
+              '2': <ScheduleQuery onNavigateToAppointment={navigateToAppointment} />,
+              '3': <AppointmentLock defaultValues={appointmentDefaults} />,
+            }[selectedKeys[0]]
+          }
         </Content>
       </Layout>
     </Layout>

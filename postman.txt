@@ -1,15 +1,16 @@
 curl --location 'http://hihis.smukqyy.cn/hai/WebServiceEntry?wsdl=null' \
 --header 'Content-Type: text/xml' \
---data '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.config.hihis.bsoft.com/">  
+--data '<?xml version="1.0" encoding="utf-8"?>
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.config.hihis.bsoft.com/">  
   <soapenv:Header/>  
   <soapenv:Body> 
     <ws:invoke> 
-      <service>ODS_ListNumber</service>  
+      <service>ODS_ConfirmAppointment</service>  
       <urid>panxb</urid>  
       <pwd>123456</pwd>  
-      <parameter><![CDATA[<?xml version="1.0" encoding="utf-8"?> <BSXml> <MsgHeader>  <Sender>SORS</Sender>  <MsgType>MSG_0101</MsgType>  <MsgVersion>3.0</MsgVersion> </MsgHeader> <MsgBody>     <Query>          <VisitOrganization>455857289</VisitOrganization>         <DeptName></DeptName>         <DeptCode>BM000008</DeptCode>         <DoctorCode>460</DoctorCode>         <ResourceLevelCode></ResourceLevelCode>         <ResourceLevelName></ResourceLevelName>         <DcotorIdcard></DcotorIdcard>         <DoctorName></DoctorName>         <ResourceLevelCode></ResourceLevelCode>         <VisitDate>2024-10-24 00:00:00</VisitDate>         <DoctorDutyType></DoctorDutyType>                 <ScheduleMark></ScheduleMark>      
-      <OutpatientType>yyqd45585728900001</OutpatientType>
-      </Query>  </MsgBody></BSXml>]]></parameter> 
+      <parameter><![CDATA[<?xml version="1.0" encoding="utf-8"?> <BSXml> <MsgHeader>  <Sender>SORS</Sender>  <MsgType>MSG_0101</MsgType>  <MsgVersion>3.0</MsgVersion> </MsgHeader> <MsgBody>     <Query>          <VisitOrganization>455857289</VisitOrganization>         <ChannelCode></ChannelCode>         <MPI></MPI>         <Operator>SF001</Operator><SourcePatientId>624477693064249344</SourcePatientId>         <OutpatientType>yyqd45585728900001</OutpatientType>         <IdCardCode></IdCardCode>         
+      <IdCard>123456789012345678</IdCard>         <Name>测试301</Name>         <MedicalCardType></MedicalCardType>         <MedicalCardId></MedicalCardId>         <PatientMobile>13800138000</PatientMobile>         <Age></Age>         <AgeUnit></AgeUnit>         <Sex>1</Sex>         <PatientAddress></PatientAddress>         <GuarderIdCard></GuarderIdCard>         <GuarderIdCardCode></GuarderIdCardCode>         <GuarderName></GuarderName>         <RequestDoctor></RequestDoctor>         <DeptCode></DeptCode>         <ResourcesId>675bde6a2897620001ef65b3</ResourcesId>         <SystemAppointmentDateTime></SystemAppointmentDateTime>         <AppointmentStatus></AppointmentStatus>         <AppointmentStatusDescription></AppointmentStatusDescription>         <EmployeeAppointmentD>2024-12-13 01:00:00</EmployeeAppointmentD>         <ResourceEndDateTime></ResourceEndDateTime>         <ResourceStartDateTime></ResourceStartDateTime>         <RegisteredCost></RegisteredCost>         <ExaminationCost></ExaminationCost>         <DoctorCost></DoctorCost>         <CardCost></CardCost>         <BookCost></BookCost>         <AppointsRoute></AppointsRoute>         <OperateDateTime></OperateDateTime>         <RegisterOperator></RegisterOperator>         <ScheduleMark>675bde692897620001ef65a9</ScheduleMark>      </Query>  </MsgBody></BSXml>]]></parameter> 
     </ws:invoke> 
   </soapenv:Body>
 </soapenv:Envelope>
