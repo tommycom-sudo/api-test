@@ -89,7 +89,15 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
       // 逐层获取节点
       const returnNode = xmlDoc.getElementsByTagName('return')[0];
       console.log('2. return 节点:', returnNode);
-      if (!returnNode) return [];
+      if (!returnNode) {
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          current: 1
+        }));
+        return [];
+      }
       
       // 获取 return 节点的文本内容并解析为新的 XML 文档
       const returnContent = returnNode.textContent;
@@ -100,20 +108,52 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
       
       const bsXml = bsXmlDoc.getElementsByTagName('BSXml')[0];
       console.log('3. BSXml 节点:', bsXml);
-      if (!bsXml) return [];
+      if (!bsXml) {
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          current: 1
+        }));
+        return [];
+      }
       
       const msgBody = bsXml.getElementsByTagName('MsgBody')[0];
       console.log('4. MsgBody 节点:', msgBody);
-      if (!msgBody) return [];
+      if (!msgBody) {
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          current: 1
+        }));
+        return [];
+      }
       
       const data = msgBody.getElementsByTagName('Data')[0];
       console.log('5. Data 节点:', data);
-      //if (!data) return [];
+      if (!data) {
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          current: 1
+        }));
+        return [];
+      }
       
       const schedulesContainer = data.getElementsByTagName('Schedules')[0];
       const schedules = schedulesContainer ? Array.from(schedulesContainer.getElementsByTagName('Schedule')) : [];
       console.log('6. Schedule 节点:', schedules);
-      if (!schedules.length) return [];
+      if (!schedules.length) {
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          current: 1
+        }));
+        return [];
+      }
       
       // 遍历所有医生的排班信息
       const result = schedules.flatMap((schedule, scheduleIndex) => {
