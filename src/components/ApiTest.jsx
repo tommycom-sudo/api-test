@@ -1,9 +1,31 @@
 import { Form, Input, Button, Card, Space } from 'antd';
 import { useState } from 'react';
+import vkbeautify from 'vkbeautify';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import xml from 'react-syntax-highlighter/dist/esm/languages/hljs/xml';
+import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
+// 注册 XML 语言支持
+SyntaxHighlighter.registerLanguage('xml', xml);
 
 const ApiTest = () => {
   const [response, setResponse] = useState('');
   const [form] = Form.useForm();
+
+  // 格式化 XML 响应
+  const formatXMLResponse = (xmlString) => {
+    try {
+      // 将 XML 字符串中的特殊字符转换回实体
+      const decodedXml = xmlString
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+      // 格式化 XML
+      return vkbeautify.xml(decodedXml);
+    } catch (error) {
+      return xmlString;
+    }
+  };
 
   const onFinish = async (values) => {
     const xmlData = `
@@ -49,7 +71,7 @@ const ApiTest = () => {
         body: xmlData,
       });
       const data = await response.text();
-      setResponse(data);
+      setResponse(formatXMLResponse(data));
     } catch (error) {
       setResponse('请求出错：' + error.message);
     }
@@ -85,10 +107,27 @@ const ApiTest = () => {
         </Form>
       </Card>
 
-      <Card title="接口响应">
-        <pre style={{ maxHeight: '400px', overflow: 'auto' }}>
-          {response}
-        </pre>
+      <Card 
+        title="接口响应" 
+        bodyStyle={{ 
+          padding: 0,
+          margin: 0,
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}
+      >
+        <SyntaxHighlighter
+          language="xml"
+          style={vs2015}
+          customStyle={{
+            margin: 0,
+            maxHeight: '400px',
+            fontSize: '14px',
+          }}
+          showLineNumbers={true}
+        >
+          {response || '等待请求...'}
+        </SyntaxHighlighter>
       </Card>
     </Space>
   );
