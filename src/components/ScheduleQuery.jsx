@@ -25,6 +25,13 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
   const [response, setResponse] = useState('');
   const [tableData, setTableData] = useState([]);
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
 
   // 固定的密码值
   const DEFAULT_PASSWORD = '123456';
@@ -53,6 +60,23 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
     } catch (error) {
       return xmlString;
     }
+  };
+
+  // 获取当前页数据
+  const getCurrentPageData = () => {
+    const { current, pageSize } = pagination;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    return data.slice(start, end);
+  };
+
+  // 处理表格变化（包括分页、排序等）
+  const handleTableChange = (newPagination) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
   };
 
   // 解析XML响应为表格数据
@@ -84,7 +108,7 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
       
       const data = msgBody.getElementsByTagName('Data')[0];
       console.log('5. Data 节点:', data);
-      if (!data) return [];
+      //if (!data) return [];
       
       const schedulesContainer = data.getElementsByTagName('Schedules')[0];
       const schedules = schedulesContainer ? Array.from(schedulesContainer.getElementsByTagName('Schedule')) : [];
@@ -136,12 +160,24 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
       });
       
       console.log('12. 最终解析结果:', result);
+      setData(result);
+      setPagination(prev => ({
+        ...prev,
+        total: result.length,
+        current: 1
+      }));
       return result;
       
     } catch (error) {
       console.error('解析XML失败:', error);
       console.error('原始XML:', xmlString);
       console.error('错误堆栈:', error.stack);
+      setData([]);
+      setPagination(prev => ({
+        ...prev,
+        total: 0,
+        current: 1
+      }));
       return [];
     }
   };
@@ -359,19 +395,19 @@ const ScheduleQuery = ({ onNavigateToAppointment }) => {
               children: (
                 <Table
                   columns={columns}
-                  dataSource={tableData}
+                  dataSource={getCurrentPageData()}
+                  loading={loading}
                   pagination={{
-                    total: tableData.length,
-                    pageSize: 10,
+                    ...pagination,
                     showSizeChanger: true,
                     showQuickJumper: true,
                     showTotal: (total) => `共 ${total} 条`,
-                    pageSizeOptions: ['10', '20', '50', '100'],
+                    pageSizeOptions: ['10', '20', '50', '100']
                   }}
-                  scroll={{ x: true }}
-                  locale={{
-                    emptyText: '暂无数据'
-                  }}
+                  onChange={handleTableChange}
+                  scroll={{ x: 1200 }}
+                  bordered
+                  size="middle"
                   onRow={(record) => ({
                     onDoubleClick: () => handleRowDoubleClick(record),
                     style: { cursor: 'pointer' }
