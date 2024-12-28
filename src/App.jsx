@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ApiTest from './components/ApiTest';
 import ScheduleQuery from './components/ScheduleQuery';
 import AppointmentLock from './components/AppointmentLock';
+import DepartmentList from './components/DepartmentList';
 
 const { Sider, Content } = Layout;
 
@@ -32,6 +33,10 @@ function App() {
           key: '3',
           label: '预约锁号',
         },
+        {
+          key: '4',
+          label: '部门列表',
+        },
       ],
     },
     // 后续可以在这里添加更多的主菜单项
@@ -56,6 +61,7 @@ function App() {
               '1': <ApiTest />,
               '2': <ScheduleQuery onNavigateToAppointment={navigateToAppointment} />,
               '3': <AppointmentLock defaultValues={appointmentDefaults} />,
+              '4': <DepartmentList />,
             }[selectedKeys[0]]
           }
         </Content>

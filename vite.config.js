@@ -9,6 +9,10 @@ export default defineConfig({
         target: 'http://hihis.smukqyy.cn',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/api/departments': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   }
