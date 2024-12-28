@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card, Space } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import vkbeautify from 'vkbeautify';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import xml from 'react-syntax-highlighter/dist/esm/languages/hljs/xml';
@@ -8,9 +8,23 @@ import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 // 注册 XML 语言支持
 SyntaxHighlighter.registerLanguage('xml', xml);
 
+// localStorage 的 key
+const FORM_DATA_KEY = 'api_test_form_data';
+
 const ApiTest = () => {
   const [response, setResponse] = useState('');
   const [form] = Form.useForm();
+
+  // 固定的密码值
+  const DEFAULT_PASSWORD = '123456';
+
+  // 组件加载时从 localStorage 读取上次的输入
+  useEffect(() => {
+    const savedData = localStorage.getItem(FORM_DATA_KEY);
+    if (savedData) {
+      form.setFieldsValue(JSON.parse(savedData));
+    }
+  }, []);
 
   // 格式化 XML 响应
   const formatXMLResponse = (xmlString) => {
@@ -28,6 +42,10 @@ const ApiTest = () => {
   };
 
   const onFinish = async (values) => {
+    // 保存表单数据到 localStorage，但排除密码字段
+    const dataToSave = { ...values };
+    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(dataToSave));
+
     const xmlData = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
         xmlns:ws="http://ws.config.hihis.bsoft.com/">
@@ -36,7 +54,7 @@ const ApiTest = () => {
           <ws:invoke>
             <service>ODS_setCardsInfo</service>
             <urid>${values.urid}</urid>
-            <pwd>${values.pwd}</pwd>
+            <pwd>${DEFAULT_PASSWORD}</pwd>
             <parameter>
               <![CDATA[
                 <BSXml>
@@ -80,12 +98,17 @@ const ApiTest = () => {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
       <Card title="病人信息录入">
-        <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form 
+          form={form} 
+          onFinish={onFinish} 
+          layout="vertical"
+          onReset={() => {
+            localStorage.removeItem(FORM_DATA_KEY);
+            form.resetFields();
+          }}
+        >
           <Form.Item label="用户名" name="urid" rules={[{ required: true }]}>
             <Input placeholder="请输入用户名" />
-          </Form.Item>
-          <Form.Item label="密码" name="pwd" rules={[{ required: true }]}>
-            <Input.Password placeholder="请输入密码" />
           </Form.Item>
           <Form.Item label="身份证号" name="idCard" rules={[{ required: true }]}>
             <Input placeholder="请输入身份证号" />
@@ -100,9 +123,14 @@ const ApiTest = () => {
             <Input placeholder="格式：YYYY-MM-DD" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              提交
-            </Button>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                提交
+              </Button>
+              <Button htmlType="reset">
+                重置
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Card>
