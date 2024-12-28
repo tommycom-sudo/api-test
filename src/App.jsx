@@ -1,6 +1,7 @@
 import { Layout, Menu } from 'antd';
 import { useState } from 'react';
 import ApiTest from './components/ApiTest';
+import ScheduleQuery from './components/ScheduleQuery';
 
 const { Sider, Content } = Layout;
 
@@ -16,7 +17,10 @@ function App() {
           key: '1',
           label: '病人信息录入',
         },
-        // 后续可以在这里添加更多的子菜单项
+        {
+          key: '2',
+          label: '号源排班查询',
+        },
       ],
     },
     // 后续可以在这里添加更多的主菜单项
@@ -36,7 +40,7 @@ function App() {
       </Sider>
       <Layout style={{ padding: '24px' }}>
         <Content>
-          <ApiTest />
+          {selectedKeys[0] === '1' ? <ApiTest /> : <ScheduleQuery />}
         </Content>
       </Layout>
     </Layout>

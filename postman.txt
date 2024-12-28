@@ -1,63 +1,16 @@
-curl --location 'http://hihis.smukqyy.cn/hai/WebServiceEntry' \
+curl --location 'http://hihis.smukqyy.cn/hai/WebServiceEntry?wsdl=null' \
 --header 'Content-Type: text/xml' \
---data '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-   xmlns:ws="http://ws.config.hihis.bsoft.com/">
-   <soapenv:Header />
-   <soapenv:Body>
-      <ws:invoke>
-         <service>ODS_setCardsInfo</service>
-         <urid>panxb</urid>
-         <pwd>123456</pwd>
-         <parameter>
-            <![CDATA[
- <BSXml>
- <MsgHeader>
-  <Sender>SORS</Sender>
-  <MsgType>MSG_0101</MsgType>
-  <MsgVersion>3.0</MsgVersion>
- </MsgHeader>
- <MsgBody>
-<MedicalCardInfos> 
-  <SourcePatientId/>  
-  <SourcePatientIdType/>  
-  <AuthorOrganization>455857289</AuthorOrganization>
-  <AuthorOrganizationName>南方医科大学口腔医院</AuthorOrganizationName>  
-  <IdCard>441202199308204012</IdCard>  
-  <MedicalInsuranceCategoryCode DisplayName="390"/>  
-  <MedicalCardId/>  
-  <MedicalCardStatus/>  
-  <EffectiveTime>20240801103000</EffectiveTime>   
-  <Name>庞煜文</Name>  
-  <Sex DisplayName="1">1</Sex>  
-  <BirthDate>1993-08-20</BirthDate>
-  <MaritalStatus DisplayName=""/>  
-  <EthnicGroup DisplayName=""/>  
-  <OccupationCategoryCode DisplayName=""/>  
-  <PatientPhone/>  
-  <WorkUnit/>  
-  <WorkAddrPhone/>  
-  <AuthorId DisplayName="system"/>  
-  <Author>系统管理员</Author>  
-  <Address> 
-    <AddressDetail>-</AddressDetail>  
-    <Province DisplayName="-">-</Province>  
-    <City DisplayName="-">-</City>  
-    <County DisplayName="-">-</County>  
-    <Town>-</Town>  
-    <Village>-</Village>  
-    <HouseNumber>-</HouseNumber>  
-    <PostalCode/> 
-  </Address>  
-  <Contact> 
-    <RelationShipWithPatient DisplayName=""/>  
-    <ContactPerson/>  
-    <ContactPersonTel/> 
-  </Contact> 
-</MedicalCardInfos>
- </MsgBody>
-</BSXml>
-]]>
-         </parameter>
-      </ws:invoke>
-   </soapenv:Body>
-</soapenv:Envelope>'
+--data '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.config.hihis.bsoft.com/">  
+  <soapenv:Header/>  
+  <soapenv:Body> 
+    <ws:invoke> 
+      <service>ODS_ListNumber</service>  
+      <urid>panxb</urid>  
+      <pwd>123456</pwd>  
+      <parameter><![CDATA[<?xml version="1.0" encoding="utf-8"?> <BSXml> <MsgHeader>  <Sender>SORS</Sender>  <MsgType>MSG_0101</MsgType>  <MsgVersion>3.0</MsgVersion> </MsgHeader> <MsgBody>     <Query>          <VisitOrganization>455857289</VisitOrganization>         <DeptName></DeptName>         <DeptCode>BM000008</DeptCode>         <DoctorCode>460</DoctorCode>         <ResourceLevelCode></ResourceLevelCode>         <ResourceLevelName></ResourceLevelName>         <DcotorIdcard></DcotorIdcard>         <DoctorName></DoctorName>         <ResourceLevelCode></ResourceLevelCode>         <VisitDate>2024-10-24 00:00:00</VisitDate>         <DoctorDutyType></DoctorDutyType>                 <ScheduleMark></ScheduleMark>      
+      <OutpatientType>yyqd45585728900001</OutpatientType>
+      </Query>  </MsgBody></BSXml>]]></parameter> 
+    </ws:invoke> 
+  </soapenv:Body>
+</soapenv:Envelope>
+'
